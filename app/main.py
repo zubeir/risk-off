@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
@@ -83,7 +84,7 @@ def index(request: Request, action: str | None = None, sort: str = "action"):
 
     # convert last timestamp to Eastern Time (EST/EDT) for display
     if rows:
-        last_ts = rows[0].ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
+        last_ts = rows[0].ts_utc.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
     else:
         last_ts = None
 
@@ -99,18 +100,21 @@ def index(request: Request, action: str | None = None, sort: str = "action"):
             last_detail = rr.detail
 
     # add formatted EST timestamps to history rows for display
+    formatted_history = []
     for h in history_rows:
+        h_dict = h.model_dump()
         try:
-            h.ts_est = h.ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
+            h_dict['ts_est'] = h.ts_utc.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
         except Exception:
-            h.ts_est = None
+            h_dict['ts_est'] = None
+        formatted_history.append(h_dict)
 
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "rows": rows,
-            "history_rows": history_rows,
+            "history_rows": formatted_history,
             "last_ts": last_ts,
             "action_filter": action or "",
             "sort": sort,
@@ -128,7 +132,7 @@ def api_status():
     ts_est = None
     if rows:
         try:
-            ts_est = rows[0].ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
+            ts_est = rows[0].ts_utc.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
         except Exception:
             ts_est = None
 
