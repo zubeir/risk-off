@@ -83,7 +83,7 @@ def index(request: Request, action: str | None = None, sort: str = "action"):
 
     # convert last timestamp to Eastern Time (EST/EDT) for display
     if rows:
-        last_ts = rows[0].ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M:%S %Z")
+        last_ts = rows[0].ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
     else:
         last_ts = None
 
@@ -101,7 +101,7 @@ def index(request: Request, action: str | None = None, sort: str = "action"):
     # add formatted EST timestamps to history rows for display
     for h in history_rows:
         try:
-            h.ts_est = h.ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M:%S %Z")
+            h.ts_est = h.ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
         except Exception:
             h.ts_est = None
 
@@ -128,7 +128,7 @@ def api_status():
     ts_est = None
     if rows:
         try:
-            ts_est = rows[0].ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M:%S %Z")
+            ts_est = rows[0].ts_utc.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M %p")
         except Exception:
             ts_est = None
 
