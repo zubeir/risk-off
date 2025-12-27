@@ -1,0 +1,28 @@
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#0b1220;color:#e6eaf2}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}
+h1{margin:0;font-size:28px}
+.meta{color:#a8b3cf;font-size:13px;margin-top:4px}
+.controls button{background:#2d6cff;border:0;color:white;padding:10px 14px;border-radius:8px;cursor:pointer}
+.controls button:disabled{opacity:.6;cursor:not-allowed}
+.checkbox{display:flex;gap:8px;align-items:center;color:#cfd7ea;font-size:13px;margin-bottom:8px}
+.checkbox input{width:16px;height:16px;accent-color:#2d6cff}
+.section{background:#111a2e;border:1px solid #1c2a4a;border-radius:12px;padding:16px}
+.section h2{margin:0 0 10px 0;font-size:18px}
+.filters{margin:12px 0 16px 0}
+.filters form{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.filters label{color:#cfd7ea;font-size:13px;display:flex;gap:8px;align-items:center}
+select,button{font:inherit}
+select{background:#0b1220;color:#e6eaf2;border:1px solid #223258;border-radius:8px;padding:8px}
+.filters button{background:#202b46;border:1px solid #2b3b66;color:#e6eaf2;padding:8px 12px;border-radius:8px;cursor:pointer}
+.tableWrap{overflow:auto;border-radius:10px;border:1px solid #1c2a4a}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th,td{padding:10px 12px;border-bottom:1px solid #1c2a4a}
+th{background:#0f1730;color:#cfd7ea;text-align:left;font-weight:600;font-size:13px}
+td{font-size:13px}
+.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+.action{font-weight:700;border-radius:8px}
+.action.hold{color:#6ee7b7}
+.action.tighten-stops{color:#fde68a}
+.action.exit{color:#fca5a5}
+tr:hover td{background:#0f1730}

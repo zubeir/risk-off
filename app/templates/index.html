@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Risk-Off Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Risk-Off Dashboard</h1>
+        <div class="meta">Last refresh (EST): {{ last_ts or '—' }}</div>
+        {% if last_status %}
+          <div class="meta">Refresh status: {{ last_status }}{% if last_detail %} ({{ last_detail }}){% endif %}</div>
+        {% endif %}
+      </div>
+      <div class="controls">
+        <label class="checkbox">
+          <input id="macroShock" type="checkbox" />
+          Macro shock
+        </label>
+        <button id="refreshBtn">Refresh now</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <form method="get" action="/">
+        <label>
+          Action:
+          <select name="action">
+            <option value="" {% if not action_filter %}selected{% endif %}>All</option>
+            <option value="Hold" {% if action_filter=='Hold' %}selected{% endif %}>Hold</option>
+            <option value="Tighten Stops" {% if action_filter=='Tighten Stops' %}selected{% endif %}>Tighten Stops</option>
+            <option value="Exit" {% if action_filter=='Exit' %}selected{% endif %}>Exit</option>
+          </select>
+        </label>
+        <label>
+          Sort:
+          <select name="sort">
+            <option value="action" {% if sort=='action' %}selected{% endif %}>Action</option>
+            <option value="signals" {% if sort=='signals' %}selected{% endif %}>Exit Signal Count</option>
+            <option value="symbol" {% if sort=='symbol' %}selected{% endif %}>Symbol</option>
+          </select>
+        </label>
+        <button type="submit">Apply</button>
+      </form>
+    </div>
+
+    <div class="section">
+      <h2>Assets</h2>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Current Price</th>
+              <th>50-Day MA</th>
+              <th>Swing Low</th>
+              <th>Current Volume</th>
+              <th>Avg Volume</th>
+              <th>Exit Signal Count</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td class="mono">{{ row.symbol }}</td>
+                <td class="mono">{{ '%.2f'|format(row.current_price) }}</td>
+                <td class="mono">{{ '%.2f'|format(row.ma_50) }}</td>
+                <td class="mono">{{ '%.2f'|format(row.swing_low) }}</td>
+                <td class="mono">{{ '%.0f'|format(row.current_volume) }}</td>
+                <td class="mono">{{ '%.0f'|format(row.avg_volume) }}</td>
+                <td class="mono">{{ row.exit_signal_count }}</td>
+                <td class="action {{ row.action|replace(' ', '-')|lower }}">{{ row.action }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" style="margin-top:16px">
+      <h2>History (last 4 days)</h2>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp (EST)</th>
+              <th>Symbol</th>
+              <th>Exit Signal Count</th>
+              <th>Action</th>
+              <th>Current Price</th>
+              <th>50-Day MA</th>
+              <th>Swing Low</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in history_rows %}
+              <tr>
+                <td class="mono">{{ h.ts_est or h.ts_utc }}</td>
+                <td class="mono">{{ h.symbol }}</td>
+                <td class="mono">{{ h.exit_signal_count }}</td>
+                <td class="action {{ h.action|replace(' ', '-')|lower }}">{{ h.action }}</td>
+                <td class="mono">{{ '%.2f'|format(h.current_price) }}</td>
+                <td class="mono">{{ '%.2f'|format(h.ma_50) }}</td>
+                <td class="mono">{{ '%.2f'|format(h.swing_low) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('refreshBtn');
+    const macro = document.getElementById('macroShock');
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Refreshing...';
+      try {
+        const qs = macro && macro.checked ? '?macro_shock=true' : '';
+        const res = await fetch('/api/refresh' + qs, { method: 'POST' });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          const msg = data && data.detail ? data.detail : 'refresh failed';
+          throw new Error(msg);
+        }
+
+        if (data && data.status && data.status !== 'success') {
+          const msg = data.detail ? data.detail : 'refresh failed';
+          throw new Error(msg);
+        }
+        window.location.reload();
+      } catch (e) {
+        alert(String(e));
+        btn.disabled = false;
+        btn.textContent = 'Refresh now';
+      }
+    });
+  </script>
+</body>
+</html>
